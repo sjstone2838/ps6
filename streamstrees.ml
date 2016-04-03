@@ -40,8 +40,15 @@ the input stream. For example:
    # first 5 (average (to_float nats)) ;;
    - : float list = [0.5; 1.5; 2.5; 3.5; 4.5]
  *)
-let average (s : float stream) : float stream =
-  failwith "average not implemented" ;;
+
+let rec average (s : float stream) : float stream =
+  (* print_float (head s);
+  print_string "-";
+  print_float( head (tail s));
+  print_newline (); *)
+  lazy (Cons(((head s) +. (head (tail s))) /. 2., average (tail s))) ;;
+
+let pi_avgs = average pi_sums;;
 
 (* Now instead of using the stream of approximations in pi_sums, you
 can instead use the stream of averaged pi_sums, which converges much
@@ -53,17 +60,24 @@ is Aitken's method. The formula is given in the problem set
 writeup. Write a function to apply this accelerator to a stream, and
 use it to generate approximations of pi. *)
 
-let aitken (s: float stream) : float stream =
-  failwith "aitken not implemented" ;;
+let rec aitken s =
+  let n = head s in 
+  let n_1 = head (tail s) in
+  let n_2 = head (tail (tail s)) in
+  let a = n  -. ((n -. n_1) ** 2.) /.  (n -. 2. *. n_1 +. n_2) in
+  lazy (Cons (a, aitken (tail s)));;
+;;
+
+let aitken = aitken pi_sums;;
 
 (* Fill out the following table, recording how many steps are need to
 get within different epsilons of pi.
 
 epsilon    pi_sums     averaged method     aitken method 
-0.1
-0.01
-0.001
-0.0001
+0.1        19          2                   0    
+0.01       199         9                   2            
+0.001      1999        30                  6               
+0.0001     19999       99                  15                 
 *)
 
   
